@@ -201,6 +201,11 @@ cc_library {
             system_shared_libs: [],
             header_libs: ["libc_headers"],
         },
+        musl: {
+            // Linking against musl uses libjemalloc5 by default, list only
+            // libc_musl here to avoid a circular dependency.
+            system_shared_libs: ["libc_musl"],
+        },
     },
 }
 
@@ -354,6 +359,7 @@ cc_library_static {
     cflags: [
         "-U_FORTIFY_SOURCE",
         "-DJEMALLOC_INTEGRATION_TEST",
+        "-DJEMALLOC_NO_RENAME",
     ],
 
     local_include_dirs: [
@@ -390,6 +396,7 @@ cc_test {
 
     cflags: common_cflags + [
         "-DJEMALLOC_INTEGRATION_TEST",
+        "-DJEMALLOC_NO_RENAME",
     ],
 
     local_include_dirs: common_c_local_includes + [
