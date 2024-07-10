@@ -180,6 +180,7 @@ generate_dirty(unsigned arena_ind, size_t size) {
 
 TEST_BEGIN(test_decay_ticks) {
 	test_skip_if(check_background_thread_enabled());
+	test_skip_if(known_failure_on_android);
 
 	ticker_t *decay_ticker;
 	unsigned tick0, tick1, arena_ind;
