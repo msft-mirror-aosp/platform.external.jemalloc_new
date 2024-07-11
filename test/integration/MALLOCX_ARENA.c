@@ -10,7 +10,7 @@ static bool have_dss =
 #endif
     ;
 
-void *
+static void *
 thd_start(void *arg) {
 	unsigned thread_ind = (unsigned)(uintptr_t)arg;
 	unsigned arena_ind;

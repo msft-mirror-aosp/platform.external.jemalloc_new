@@ -8,7 +8,7 @@ static const bool config_stats =
 #endif
     ;
 
-void *
+static void *
 thd_start(void *arg) {
 	int err;
 	void *p;
