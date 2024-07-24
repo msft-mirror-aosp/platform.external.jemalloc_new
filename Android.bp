@@ -92,30 +92,30 @@ common_c_local_includes = [
 //     1 << XX is the maximum sized allocation that will be in the tcache.
 
 android_common_cflags = [
-    // Default some parameters to small values to minimize PSS.
-    // These parameters will be overridden by android_product_variables
-    // for non-svelte configs.
-    "-DANDROID_NUM_ARENAS=1",
-    // This value cannot go below 2.
-    "-DANDROID_TCACHE_NSLOTS_SMALL_MAX=2",
-    "-DANDROID_TCACHE_NSLOTS_LARGE=1",
+    // Default parameters for jemalloc config.
+    "-DANDROID_ENABLE_TCACHE",
+    "-DANDROID_LG_TCACHE_MAXCLASS_DEFAULT=16",
+    "-DANDROID_NUM_ARENAS=2",
+    "-DANDROID_TCACHE_NSLOTS_SMALL_MAX=8",
+    "-DANDROID_TCACHE_NSLOTS_LARGE=16",
 ]
 
 android_product_variables = {
-    // Only enable the tcache on non-svelte configurations, to save PSS.
-    malloc_not_svelte: {
+    malloc_low_memory: {
+        // Parameters to minimize RSS.
         cflags: [
-            "-DANDROID_ENABLE_TCACHE",
-            "-DANDROID_LG_TCACHE_MAXCLASS_DEFAULT=16",
+            // Disable the tcache on non-svelte configurations, to save PSS.
+            "-UANDROID_ENABLE_TCACHE",
 
             "-UANDROID_NUM_ARENAS",
-            "-DANDROID_NUM_ARENAS=2",
+            "-DANDROID_NUM_ARENAS=1",
 
+            // This value cannot go below 2.
             "-UANDROID_TCACHE_NSLOTS_SMALL_MAX",
-            "-DANDROID_TCACHE_NSLOTS_SMALL_MAX=8",
+            "-DANDROID_TCACHE_NSLOTS_SMALL_MAX=2",
 
             "-UANDROID_TCACHE_NSLOTS_LARGE",
-            "-DANDROID_TCACHE_NSLOTS_LARGE=16",
+            "-DANDROID_TCACHE_NSLOTS_LARGE=1",
         ],
     },
 }
@@ -208,6 +208,49 @@ cc_library {
     },
     apex_available: [
         "com.android.runtime",
+    ],
+}
+
+//-----------------------------------------------------------------------
+// jemalloc "je"-prefixed static library
+//
+// This is the same as "libjemalloc5", except:
+//  - It only supports host (just because we don't need it for device)
+//  - all the functions (malloc, calloc, free, etc.) have a "je_" prefix.
+//    The -DJEMALLOC_NO_RENAME flag causes the prefix to be added.
+//
+// We need this because when building rust binaries with jemalloc and
+// the tikv-jemallocator wrappers, code in libc gets a segfault before
+// reaching main(). I'm not sure why that is, but if we prefix the jemalloc
+// methods and have the tikv-jemallocator crate use the prefixed ones,
+// all rust code will use jemalloc successfully while libc will continue
+// using the system allocator.
+//-----------------------------------------------------------------------
+cc_library_host_static {
+    name: "libjemalloc5_je_prefixed",
+
+    defaults: ["jemalloc5_defaults"],
+
+    cflags: ["-DJEMALLOC_NO_RENAME"],
+
+    srcs: lib_src_files,
+
+    export_include_dirs: ["include"],
+
+    target: {
+        linux_bionic: {
+            system_shared_libs: [],
+            header_libs: ["libc_headers"],
+        },
+        musl: {
+            // Linking against musl uses libjemalloc5 by default, list only
+            // libc_musl here to avoid a circular dependency.
+            system_shared_libs: ["libc_musl"],
+        },
+    },
+
+    visibility: [
+        "//external/rust/crates/tikv-jemalloc-sys:__subpackages__",
     ],
 }
 
@@ -318,26 +361,50 @@ unit_tests = [
     "test/unit/zero.c",
 ]
 
+genrule_defaults {
+    name: "jemalloc5_gtestifier_defaults",
+    tools: ["gtestifier"],
+    cmd: "$(location gtestifier)" +
+        " --in $(in)" +
+        " --out $(out)" +
+        " --suite jemalloc5" +
+        " --test_name_prefix test_ " +
+        " --main_no_arguments " +
+        " --predicate testResultPredicate",
+}
+
+gensrcs {
+    name: "jemalloc5_unittests_gtestified_srcs",
+    defaults: ["jemalloc5_gtestifier_defaults"],
+    srcs: unit_tests,
+    output_extension: "c",
+}
+
 cc_test {
     name: "jemalloc5_unittests",
 
     defaults: ["jemalloc5_defaults"],
 
-    gtest: false,
-
     cflags: common_cflags + [
         "-DJEMALLOC_UNIT_TEST",
+        "-include jemalloc_gtest.h",
     ],
+
+    stl: "libc++",
 
     local_include_dirs: common_c_local_includes + [
         "test/include",
+        "android/test",
     ],
 
-    srcs: unit_tests,
+    srcs: [":jemalloc5_unittests_gtestified_srcs"],
 
-    static_libs: ["libjemalloc5_unittest"],
+    static_libs: [
+        "libjemalloc5_unittest",
+        "libgtestifier",
+    ],
 
-    test_per_src: true,
+    isolated: true,
 
     target: {
         linux_bionic: {
@@ -388,30 +455,51 @@ integration_tests = [
     "test/integration/sdallocx.c",
     "test/integration/thread_arena.c",
     "test/integration/xallocx.c",
+]
+
+integration_cpp_tests = [
     "test/integration/cpp/basic.cpp",
 ]
+
+gensrcs {
+    name: "jemalloc5_integrationtests_gtestified_srcs",
+    defaults: ["jemalloc5_gtestifier_defaults"],
+    srcs: integration_tests,
+    output_extension: "c",
+}
+
+gensrcs {
+    name: "jemalloc5_cpp_integrationtests_gtestified_srcs",
+    defaults: ["jemalloc5_gtestifier_defaults"],
+    srcs: integration_cpp_tests,
+    output_extension: "cpp",
+}
 
 cc_test {
     name: "jemalloc5_integrationtests",
 
     defaults: ["jemalloc5_defaults"],
 
-    gtest: false,
-
     cflags: common_cflags + [
         "-DJEMALLOC_INTEGRATION_TEST",
         "-DJEMALLOC_NO_RENAME",
+        "-include jemalloc_gtest.h",
     ],
 
     local_include_dirs: common_c_local_includes + [
         "test/include",
+        "android/test",
     ],
 
-    srcs: integration_tests,
+    srcs: [
+        ":jemalloc5_integrationtests_gtestified_srcs",
+        ":jemalloc5_cpp_integrationtests_gtestified_srcs",
+    ],
 
-    static_libs: ["libjemalloc5_integrationtest"],
-
-    test_per_src: true,
+    static_libs: [
+        "libjemalloc5_integrationtest",
+        "libgtestifier",
+    ],
 
     target: {
         linux_glibc: {
@@ -455,30 +543,36 @@ stress_tests = [
     "test/stress/microbench.c",
 ]
 
+gensrcs {
+    name: "jemalloc5_stresstests_gtestified_srcs",
+    defaults: ["jemalloc5_gtestifier_defaults"],
+    srcs: stress_tests,
+    output_extension: "c",
+}
+
 cc_test {
     name: "jemalloc5_stresstests",
 
     defaults: ["jemalloc5_defaults"],
 
-    gtest: false,
-
     cflags: common_cflags + [
         "-DJEMALLOC_STRESS_TEST",
+        "-include jemalloc_gtest.h",
     ],
 
     local_include_dirs: common_c_local_includes + [
         "test/include",
+        "android/test",
     ],
 
-    srcs: stress_tests,
+    srcs: [":jemalloc5_stresstests_gtestified_srcs"],
 
     static_libs: [
         "libjemalloc5",
         "libjemalloc5_stresstestlib",
         "libjemalloc5_jet",
+        "libgtestifier",
     ],
-
-    test_per_src: true,
 
     target: {
         linux_glibc: {
@@ -488,4 +582,6 @@ cc_test {
             },
         },
     },
+
+    stl: "libc++",
 }
