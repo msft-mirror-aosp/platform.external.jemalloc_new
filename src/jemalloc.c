@@ -3344,4 +3344,5 @@ jemalloc_postfork_child(void) {
 #if defined(__BIONIC__) && !defined(JEMALLOC_JET)
 #include "android_je_iterate.c"
 #include "android_je_mallinfo.c"
+#include "android_je_stats.c"
 #endif
