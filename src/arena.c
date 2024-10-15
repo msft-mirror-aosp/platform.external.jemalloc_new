@@ -1944,6 +1944,9 @@ void
 arena_prefork1(tsdn_t *tsdn, arena_t *arena) {
 	if (config_stats) {
 		malloc_mutex_prefork(tsdn, &arena->tcache_ql_mtx);
+#ifndef JEMALLOC_ATOMIC_U64
+		malloc_mutex_prefork(tsdn, &arena->stats.mtx);
+#endif
 	}
 }
 
@@ -1991,13 +1994,16 @@ arena_postfork_parent(tsdn_t *tsdn, arena_t *arena) {
 	malloc_mutex_postfork_parent(tsdn, &arena->large_mtx);
 	base_postfork_parent(tsdn, arena->base);
 	malloc_mutex_postfork_parent(tsdn, &arena->extent_avail_mtx);
-	extents_postfork_parent(tsdn, &arena->extents_dirty);
-	extents_postfork_parent(tsdn, &arena->extents_muzzy);
 	extents_postfork_parent(tsdn, &arena->extents_retained);
+	extents_postfork_parent(tsdn, &arena->extents_muzzy);
+	extents_postfork_parent(tsdn, &arena->extents_dirty);
 	malloc_mutex_postfork_parent(tsdn, &arena->extent_grow_mtx);
 	malloc_mutex_postfork_parent(tsdn, &arena->decay_dirty.mtx);
 	malloc_mutex_postfork_parent(tsdn, &arena->decay_muzzy.mtx);
 	if (config_stats) {
+#ifndef JEMALLOC_ATOMIC_U64
+		malloc_mutex_postfork_parent(tsdn, &arena->stats.mtx);
+#endif
 		malloc_mutex_postfork_parent(tsdn, &arena->tcache_ql_mtx);
 	}
 }
@@ -2035,13 +2041,16 @@ arena_postfork_child(tsdn_t *tsdn, arena_t *arena) {
 	malloc_mutex_postfork_child(tsdn, &arena->large_mtx);
 	base_postfork_child(tsdn, arena->base);
 	malloc_mutex_postfork_child(tsdn, &arena->extent_avail_mtx);
-	extents_postfork_child(tsdn, &arena->extents_dirty);
-	extents_postfork_child(tsdn, &arena->extents_muzzy);
 	extents_postfork_child(tsdn, &arena->extents_retained);
+	extents_postfork_child(tsdn, &arena->extents_muzzy);
+	extents_postfork_child(tsdn, &arena->extents_dirty);
 	malloc_mutex_postfork_child(tsdn, &arena->extent_grow_mtx);
 	malloc_mutex_postfork_child(tsdn, &arena->decay_dirty.mtx);
 	malloc_mutex_postfork_child(tsdn, &arena->decay_muzzy.mtx);
 	if (config_stats) {
+#ifndef JEMALLOC_ATOMIC_U64
+		malloc_mutex_postfork_child(tsdn, &arena->stats.mtx);
+#endif
 		malloc_mutex_postfork_child(tsdn, &arena->tcache_ql_mtx);
 	}
 }

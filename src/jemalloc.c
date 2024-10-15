@@ -3322,6 +3322,7 @@ jemalloc_postfork_child(void) {
 	tsd = tsd_fetch();
 
 	witness_postfork_child(tsd_witness_tsdp_get(tsd));
+	extent_postfork_child(tsd_tsdn(tsd));
 	/* Release all mutexes, now that fork() has completed. */
 	for (i = 0, narenas = narenas_total_get(); i < narenas; i++) {
 		arena_t *arena;
