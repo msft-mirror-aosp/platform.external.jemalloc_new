@@ -27,6 +27,7 @@ struct arena_stats_large_s {
 	arena_stats_u64_t	nmalloc;
 	arena_stats_u64_t	ndalloc;
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	/*
 	 * Number of allocation requests that correspond to this size class.
 	 * This includes requests served by tcache, though tcache only
@@ -36,6 +37,7 @@ struct arena_stats_large_s {
 
 	/* Current number of allocations of this size class. */
 	size_t		curlextents; /* Derived. */
+#endif
 };
 
 typedef struct arena_stats_decay_s arena_stats_decay_t;
@@ -62,6 +64,7 @@ struct arena_stats_s {
 	/* Number of bytes currently mapped, excluding retained memory. */
 	atomic_zu_t		mapped; /* Partially derived. */
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	/*
 	 * Number of unused virtual memory bytes currently retained.  Retained
 	 * bytes are technically mapped (though always decommitted or purged),
@@ -86,6 +89,7 @@ struct arena_stats_s {
 	atomic_zu_t		tcache_bytes; /* Derived. */
 
 	mutex_prof_data_t mutex_prof_data[mutex_prof_num_arena_mutexes];
+#endif
 
 	/* One element for each large size class. */
 	arena_stats_large_t	lstats[NSIZES - NBINS];
@@ -220,10 +224,12 @@ arena_stats_accum_zu(atomic_zu_t *dst, size_t src) {
 static inline void
 arena_stats_large_nrequests_add(tsdn_t *tsdn, arena_stats_t *arena_stats,
     szind_t szind, uint64_t nrequests) {
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	arena_stats_lock(tsdn, arena_stats);
 	arena_stats_add_u64(tsdn, arena_stats, &arena_stats->lstats[szind -
 	    NBINS].nrequests, nrequests);
 	arena_stats_unlock(tsdn, arena_stats);
+#endif
 }
 
 static inline void
