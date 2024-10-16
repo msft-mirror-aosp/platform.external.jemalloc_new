@@ -2191,3 +2191,14 @@ extent_boot(void) {
 
 	return false;
 }
+
+void
+extent_postfork_child(tsdn_t *tsdn) {
+	// There is the possibility that a thread is holding one of these locks
+	// when forking, but all of the other locks acquired during the prefork
+	// should prevent any corruption if this code resets the locks.
+	mutex_pool_init(&extent_mutex_pool, "extent_mutex_pool",
+	    WITNESS_RANK_EXTENT_POOL);
+
+	malloc_mutex_init(&extents_rtree.init_lock, "rtree", WITNESS_RANK_RTREE, malloc_mutex_rank_exclusive);
+}
