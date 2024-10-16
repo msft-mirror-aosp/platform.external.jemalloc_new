@@ -631,6 +631,7 @@ arenas_tdata_cleanup(tsd_t *tsd) {
 
 static void
 stats_print_atexit(void) {
+#if defined(ANDROID_ENABLE_TCACHE)
 	if (config_stats) {
 		tsdn_t *tsdn;
 		unsigned narenas, i;
@@ -658,6 +659,7 @@ stats_print_atexit(void) {
 			}
 		}
 	}
+#endif
 	je_malloc_stats_print(NULL, NULL, opt_stats_print_opts);
 }
 
