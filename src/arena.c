@@ -91,6 +91,7 @@ arena_stats_merge(tsdn_t *tsdn, arena_t *arena, unsigned *nthreads,
 
 	arena_stats_accum_zu(&astats->mapped, base_mapped
 	    + arena_stats_read_zu(tsdn, &arena->stats, &arena->stats.mapped));
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	arena_stats_accum_zu(&astats->retained,
 	    extents_npages_get(&arena->extents_retained) << LG_PAGE);
 
@@ -121,35 +122,45 @@ arena_stats_merge(tsdn_t *tsdn, arena_t *arena, unsigned *nthreads,
 	    (((atomic_load_zu(&arena->nactive, ATOMIC_RELAXED) +
 	    extents_npages_get(&arena->extents_dirty) +
 	    extents_npages_get(&arena->extents_muzzy)) << LG_PAGE)));
+#endif
 
 	for (szind_t i = 0; i < NSIZES - NBINS; i++) {
 		uint64_t nmalloc = arena_stats_read_u64(tsdn, &arena->stats,
 		    &arena->stats.lstats[i].nmalloc);
 		arena_stats_accum_u64(&lstats[i].nmalloc, nmalloc);
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		arena_stats_accum_u64(&astats->nmalloc_large, nmalloc);
+#endif
 
 		uint64_t ndalloc = arena_stats_read_u64(tsdn, &arena->stats,
 		    &arena->stats.lstats[i].ndalloc);
 		arena_stats_accum_u64(&lstats[i].ndalloc, ndalloc);
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		arena_stats_accum_u64(&astats->ndalloc_large, ndalloc);
+#endif
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		uint64_t nrequests = arena_stats_read_u64(tsdn, &arena->stats,
 		    &arena->stats.lstats[i].nrequests);
 		arena_stats_accum_u64(&lstats[i].nrequests,
 		    nmalloc + nrequests);
 		arena_stats_accum_u64(&astats->nrequests_large,
 		    nmalloc + nrequests);
+#endif
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		assert(nmalloc >= ndalloc);
 		assert(nmalloc - ndalloc <= SIZE_T_MAX);
 		size_t curlextents = (size_t)(nmalloc - ndalloc);
 		lstats[i].curlextents += curlextents;
 		arena_stats_accum_zu(&astats->allocated_large,
 		    curlextents * sz_index2size(NBINS + i));
+#endif
 	}
 
 	arena_stats_unlock(tsdn, &arena->stats);
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS) && defined(ANDROID_ENABLE_TCACHE)
 	/* tcache_bytes counts currently cached bytes. */
 	atomic_store_zu(&astats->tcache_bytes, 0, ATOMIC_RELAXED);
 	malloc_mutex_lock(tsdn, &arena->tcache_ql_mtx);
@@ -171,7 +182,9 @@ arena_stats_merge(tsdn_t *tsdn, arena_t *arena, unsigned *nthreads,
 	    &astats->mutex_prof_data[arena_prof_mutex_tcache_list],
 	    &arena->tcache_ql_mtx);
 	malloc_mutex_unlock(tsdn, &arena->tcache_ql_mtx);
+#endif
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 #define READ_ARENA_MUTEX_PROF_DATA(mtx, ind)				\
     malloc_mutex_lock(tsdn, &arena->mtx);				\
     malloc_mutex_prof_read(tsdn, &astats->mutex_prof_data[ind],		\
@@ -195,6 +208,7 @@ arena_stats_merge(tsdn_t *tsdn, arena_t *arena, unsigned *nthreads,
 	READ_ARENA_MUTEX_PROF_DATA(base->mtx,
 	    arena_prof_mutex_base)
 #undef READ_ARENA_MUTEX_PROF_DATA
+#endif
 
 	nstime_copy(&astats->uptime, &arena->create_time);
 	nstime_update(&astats->uptime);
@@ -473,6 +487,7 @@ arena_decay_backlog_update_last(arena_decay_t *decay, size_t current_npages) {
 	    current_npages - decay->nunpurged : 0;
 	decay->backlog[SMOOTHSTEP_NSTEPS-1] = npages_delta;
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	if (config_debug) {
 		if (current_npages > decay->ceil_npages) {
 			decay->ceil_npages = current_npages;
@@ -483,6 +498,7 @@ arena_decay_backlog_update_last(arena_decay_t *decay, size_t current_npages) {
 			decay->ceil_npages = npages_limit;
 		}
 	}
+#endif
 }
 
 static void
@@ -579,22 +595,26 @@ arena_decay_reinit(arena_decay_t *decay, ssize_t decay_ms) {
 static bool
 arena_decay_init(arena_decay_t *decay, ssize_t decay_ms,
     arena_stats_decay_t *stats) {
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	if (config_debug) {
 		for (size_t i = 0; i < sizeof(arena_decay_t); i++) {
 			assert(((char *)decay)[i] == 0);
 		}
 		decay->ceil_npages = 0;
 	}
+#endif
 	if (malloc_mutex_init(&decay->mtx, "decay", WITNESS_RANK_DECAY,
 	    malloc_mutex_rank_exclusive)) {
 		return true;
 	}
 	decay->purging = false;
 	arena_decay_reinit(decay, decay_ms);
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	/* Memory is zeroed, so there is no need to clear stats. */
 	if (config_stats) {
 		decay->stats = stats;
 	}
+#endif
 	return false;
 }
 
@@ -791,12 +811,14 @@ arena_decay_stashed(tsdn_t *tsdn, arena_t *arena,
 
 	if (config_stats) {
 		arena_stats_lock(tsdn, &arena->stats);
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		arena_stats_add_u64(tsdn, &arena->stats, &decay->stats->npurge,
 		    1);
 		arena_stats_add_u64(tsdn, &arena->stats,
 		    &decay->stats->nmadvise, nmadvise);
 		arena_stats_add_u64(tsdn, &arena->stats, &decay->stats->purged,
 		    npurged);
+#endif
 		arena_stats_sub_zu(tsdn, &arena->stats, &arena->stats.mapped,
 		    nunmapped << LG_PAGE);
 		arena_stats_unlock(tsdn, &arena->stats);
@@ -926,9 +948,11 @@ arena_bin_slabs_nonfull_tryget(bin_t *bin) {
 	if (slab == NULL) {
 		return NULL;
 	}
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	if (config_stats) {
 		bin->stats.reslabs++;
 	}
+#endif
 	return slab;
 }
 
@@ -1025,7 +1049,9 @@ arena_reset(tsd_t *tsd, arena_t *arena) {
 		}
 		if (config_stats) {
 			bin->stats.curregs = 0;
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 			bin->stats.curslabs = 0;
+#endif
 		}
 		malloc_mutex_unlock(tsd_tsdn(tsd), &bin->lock);
 	}
@@ -1170,10 +1196,12 @@ arena_bin_nonfull_slab_get(tsdn_t *tsdn, arena_t *arena, bin_t *bin,
 	/********************************/
 	malloc_mutex_lock(tsdn, &bin->lock);
 	if (slab != NULL) {
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		if (config_stats) {
 			bin->stats.nslabs++;
 			bin->stats.curslabs++;
 		}
+#endif
 		return slab;
 	}
 
@@ -1293,7 +1321,9 @@ arena_tcache_fill_small(tsdn_t *tsdn, arena_t *arena, tcache_t *tcache,
 		bin->stats.nrequests += tbin->tstats.nrequests;
 #endif
 		bin->stats.curregs += i;
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		bin->stats.nfills++;
+#endif
 #if defined(ANDROID_ENABLE_TCACHE_STATS)
 		tbin->tstats.nrequests = 0;
 #endif
@@ -1342,7 +1372,9 @@ arena_malloc_small(tsdn_t *tsdn, arena_t *arena, szind_t binind, bool zero) {
 
 	if (config_stats) {
 		bin->stats.nmalloc++;
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		bin->stats.nrequests++;
+#endif
 		bin->stats.curregs++;
 	}
 	malloc_mutex_unlock(tsdn, &bin->lock);
@@ -1428,7 +1460,9 @@ arena_prof_promote(tsdn_t *tsdn, const void *ptr, size_t usize) {
 	rtree_szind_slab_update(tsdn, &extents_rtree, rtree_ctx, (uintptr_t)ptr,
 	    szind, false);
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	prof_accum_cancel(tsdn, &arena->prof_accum, usize);
+#endif
 
 	assert(isalloc(tsdn, ptr) == usize);
 }
@@ -1497,9 +1531,11 @@ arena_dalloc_bin_slab(tsdn_t *tsdn, arena_t *arena, extent_t *slab,
 	arena_slab_dalloc(tsdn, arena, slab);
 	/****************************/
 	malloc_mutex_lock(tsdn, &bin->lock);
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	if (config_stats) {
 		bin->stats.curslabs--;
 	}
+#endif
 }
 
 static void
@@ -1521,9 +1557,11 @@ arena_bin_lower_slab(UNUSED tsdn_t *tsdn, arena_t *arena, extent_t *slab,
 			arena_bin_slabs_full_insert(arena, bin, bin->slabcur);
 		}
 		bin->slabcur = slab;
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		if (config_stats) {
 			bin->stats.reslabs++;
 		}
+#endif
 	} else {
 		arena_bin_slabs_nonfull_insert(bin, slab);
 	}
@@ -1791,19 +1829,23 @@ arena_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks) {
 			goto label_error;
 		}
 
+#if defined(ANDROID_ENABLE_TCACHE)
 		ql_new(&arena->tcache_ql);
 		ql_new(&arena->cache_bin_array_descriptor_ql);
 		if (malloc_mutex_init(&arena->tcache_ql_mtx, "tcache_ql",
 		    WITNESS_RANK_TCACHE_QL, malloc_mutex_rank_exclusive)) {
 			goto label_error;
 		}
+#endif
 	}
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	if (config_prof) {
 		if (prof_accum_init(tsdn, &arena->prof_accum)) {
 			goto label_error;
 		}
 	}
+#endif
 
 	if (config_cache_oblivious) {
 		/*
@@ -1859,6 +1901,7 @@ arena_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks) {
 		goto label_error;
 	}
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	if (arena_decay_init(&arena->decay_dirty,
 	    arena_dirty_decay_ms_default_get(), &arena->stats.decay_dirty)) {
 		goto label_error;
@@ -1867,6 +1910,16 @@ arena_new(tsdn_t *tsdn, unsigned ind, extent_hooks_t *extent_hooks) {
 	    arena_muzzy_decay_ms_default_get(), &arena->stats.decay_muzzy)) {
 		goto label_error;
 	}
+#else
+	if (arena_decay_init(&arena->decay_dirty,
+	    arena_dirty_decay_ms_default_get(), NULL)) {
+		goto label_error;
+	}
+	if (arena_decay_init(&arena->decay_muzzy,
+	    arena_muzzy_decay_ms_default_get(), NULL)) {
+		goto label_error;
+	}
+#endif
 
 	arena->extent_grow_next = sz_psz2ind(HUGEPAGE);
 	arena->retain_grow_limit = EXTENT_GROW_MAX_PIND;
@@ -1943,7 +1996,9 @@ arena_prefork0(tsdn_t *tsdn, arena_t *arena) {
 void
 arena_prefork1(tsdn_t *tsdn, arena_t *arena) {
 	if (config_stats) {
+#if defined(ANDROID_ENABLE_TCACHE)
 		malloc_mutex_prefork(tsdn, &arena->tcache_ql_mtx);
+#endif
 #ifndef JEMALLOC_ATOMIC_U64
 		malloc_mutex_prefork(tsdn, &arena->stats.mtx);
 #endif
@@ -2004,7 +2059,9 @@ arena_postfork_parent(tsdn_t *tsdn, arena_t *arena) {
 #ifndef JEMALLOC_ATOMIC_U64
 		malloc_mutex_postfork_parent(tsdn, &arena->stats.mtx);
 #endif
+#if defined(ANDROID_ENABLE_TCACHE)
 		malloc_mutex_postfork_parent(tsdn, &arena->tcache_ql_mtx);
+#endif
 	}
 }
 
@@ -2020,6 +2077,7 @@ arena_postfork_child(tsdn_t *tsdn, arena_t *arena) {
 	if (tsd_iarena_get(tsdn_tsd(tsdn)) == arena) {
 		arena_nthreads_inc(arena, true);
 	}
+#if defined(ANDROID_ENABLE_TCACHE)
 	if (config_stats) {
 		ql_new(&arena->tcache_ql);
 		ql_new(&arena->cache_bin_array_descriptor_ql);
@@ -2034,6 +2092,7 @@ arena_postfork_child(tsdn_t *tsdn, arena_t *arena) {
 			    &tcache->cache_bin_array_descriptor, link);
 		}
 	}
+#endif
 
 	for (i = 0; i < NBINS; i++) {
 		bin_postfork_child(tsdn, &arena->bins[i]);
@@ -2051,6 +2110,8 @@ arena_postfork_child(tsdn_t *tsdn, arena_t *arena) {
 #ifndef JEMALLOC_ATOMIC_U64
 		malloc_mutex_postfork_child(tsdn, &arena->stats.mtx);
 #endif
+#if defined(ANDROID_ENABLE_TCACHE)
 		malloc_mutex_postfork_child(tsdn, &arena->tcache_ql_mtx);
+#endif
 	}
 }

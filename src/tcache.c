@@ -139,7 +139,9 @@ tcache_bin_flush_small(tsd_t *tsd, tcache_t *tcache, cache_bin_t *tbin,
 		if (config_stats && bin_arena == arena) {
 			assert(!merged_stats);
 			merged_stats = true;
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 			bin->stats.nflushes++;
+#endif
 #if defined(ANDROID_ENABLE_TCACHE_STATS)
 			bin->stats.nrequests += tbin->tstats.nrequests;
 			tbin->tstats.nrequests = 0;
@@ -177,7 +179,9 @@ tcache_bin_flush_small(tsd_t *tsd, tcache_t *tcache, cache_bin_t *tbin,
 		 */
 		bin_t *bin = &arena->bins[binind];
 		malloc_mutex_lock(tsd_tsdn(tsd), &bin->lock);
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		bin->stats.nflushes++;
+#endif
 #if defined(ANDROID_ENABLE_TCACHE_STATS)
 		bin->stats.nrequests += tbin->tstats.nrequests;
 		tbin->tstats.nrequests = 0;
@@ -299,6 +303,7 @@ tcache_bin_flush_large(tsd_t *tsd, cache_bin_t *tbin, szind_t binind,
 
 void
 tcache_arena_associate(tsdn_t *tsdn, tcache_t *tcache, arena_t *arena) {
+#if defined(ANDROID_ENABLE_TCACHE)
 	assert(tcache->arena == NULL);
 	tcache->arena = arena;
 
@@ -316,10 +321,12 @@ tcache_arena_associate(tsdn_t *tsdn, tcache_t *tcache, arena_t *arena) {
 
 		malloc_mutex_unlock(tsdn, &arena->tcache_ql_mtx);
 	}
+#endif
 }
 
 static void
 tcache_arena_dissociate(tsdn_t *tsdn, tcache_t *tcache) {
+#if defined(ANDROID_ENABLE_TCACHE)
 	arena_t *arena = tcache->arena;
 	assert(arena != NULL);
 	if (config_stats) {
@@ -343,6 +350,7 @@ tcache_arena_dissociate(tsdn_t *tsdn, tcache_t *tcache) {
 		malloc_mutex_unlock(tsdn, &arena->tcache_ql_mtx);
 	}
 	tcache->arena = NULL;
+#endif
 }
 
 void
