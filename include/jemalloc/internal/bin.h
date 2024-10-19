@@ -93,13 +93,17 @@ bin_stats_merge(tsdn_t *tsdn, bin_stats_t *dst_bin_stats, bin_t *bin) {
 	malloc_mutex_prof_read(tsdn, &dst_bin_stats->mutex_data, &bin->lock);
 	dst_bin_stats->nmalloc += bin->stats.nmalloc;
 	dst_bin_stats->ndalloc += bin->stats.ndalloc;
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	dst_bin_stats->nrequests += bin->stats.nrequests;
+#endif
 	dst_bin_stats->curregs += bin->stats.curregs;
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	dst_bin_stats->nfills += bin->stats.nfills;
 	dst_bin_stats->nflushes += bin->stats.nflushes;
 	dst_bin_stats->nslabs += bin->stats.nslabs;
 	dst_bin_stats->reslabs += bin->stats.reslabs;
 	dst_bin_stats->curslabs += bin->stats.curslabs;
+#endif
 	malloc_mutex_unlock(tsdn, &bin->lock);
 }
 
