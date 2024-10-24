@@ -69,5 +69,6 @@ bool extent_merge_wrapper(tsdn_t *tsdn, arena_t *arena,
     extent_hooks_t **r_extent_hooks, extent_t *a, extent_t *b);
 
 bool extent_boot(void);
+void extent_postfork_child(tsdn_t *tsdn);
 
 #endif /* JEMALLOC_INTERNAL_EXTENT_EXTERNS_H */
