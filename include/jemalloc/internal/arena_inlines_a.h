@@ -8,21 +8,30 @@ arena_ind_get(const arena_t *arena) {
 
 static inline void
 arena_internal_add(arena_t *arena, size_t size) {
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	atomic_fetch_add_zu(&arena->stats.internal, size, ATOMIC_RELAXED);
+#endif
 }
 
 static inline void
 arena_internal_sub(arena_t *arena, size_t size) {
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	atomic_fetch_sub_zu(&arena->stats.internal, size, ATOMIC_RELAXED);
+#endif
 }
 
 static inline size_t
 arena_internal_get(arena_t *arena) {
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	return atomic_load_zu(&arena->stats.internal, ATOMIC_RELAXED);
+#else
+	return 0;
+#endif
 }
 
 static inline bool
 arena_prof_accum(tsdn_t *tsdn, arena_t *arena, uint64_t accumbytes) {
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	cassert(config_prof);
 
 	if (likely(prof_interval == 0 || !prof_active_get_unlocked())) {
@@ -30,6 +39,9 @@ arena_prof_accum(tsdn_t *tsdn, arena_t *arena, uint64_t accumbytes) {
 	}
 
 	return prof_accum_add(tsdn, &arena->prof_accum, accumbytes);
+#else
+  return false;
+#endif
 }
 
 static inline void
