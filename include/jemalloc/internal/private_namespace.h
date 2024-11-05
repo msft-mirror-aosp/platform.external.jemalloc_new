@@ -156,6 +156,7 @@
 #define extent_avail_remove_any JEMALLOC_N(extent_avail_remove_any)
 #define extent_avail_remove_first JEMALLOC_N(extent_avail_remove_first)
 #define extent_boot JEMALLOC_N(extent_boot)
+#define extent_postfork_child JEMALLOC_N(extent_postfork_child)
 #define extent_commit_wrapper JEMALLOC_N(extent_commit_wrapper)
 #define extent_dalloc JEMALLOC_N(extent_dalloc)
 #define extent_dalloc_gap JEMALLOC_N(extent_dalloc_gap)

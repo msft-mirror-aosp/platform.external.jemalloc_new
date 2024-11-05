@@ -63,6 +63,7 @@ struct arena_decay_s {
 	 */
 	size_t			backlog[SMOOTHSTEP_NSTEPS];
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	/*
 	 * Pointer to associated stats.  These stats are embedded directly in
 	 * the arena's stats due to how stats structures are shared between the
@@ -72,6 +73,7 @@ struct arena_decay_s {
 	arena_stats_decay_t	*stats;
 	/* Peak number of pages in associated extents.  Used for debug only. */
 	uint64_t		ceil_npages;
+#endif
 };
 
 struct arena_s {
@@ -100,6 +102,7 @@ struct arena_s {
 	/* Synchronization: internal. */
 	arena_stats_t		stats;
 
+#if defined(ANDROID_ENABLE_TCACHE)
 	/*
 	 * Lists of tcaches and cache_bin_array_descriptors for extant threads
 	 * associated with this arena.  Stats from these are merged
@@ -110,10 +113,13 @@ struct arena_s {
 	ql_head(tcache_t)			tcache_ql;
 	ql_head(cache_bin_array_descriptor_t)	cache_bin_array_descriptor_ql;
 	malloc_mutex_t				tcache_ql_mtx;
+#endif
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	/* Synchronization: internal. */
 	prof_accum_t		prof_accum;
 	uint64_t		prof_accumbytes;
+#endif
 
 	/*
 	 * PRNG state for cache index randomization of large allocation base
