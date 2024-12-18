@@ -67,6 +67,9 @@ common_cflags = [
     "-Wno-missing-field-initializers",
 
     "-U_FORTIFY_SOURCE",
+
+    // Default enable the tcache.
+    "-DANDROID_ENABLE_TCACHE",
 ]
 
 common_c_local_includes = [
@@ -93,7 +96,6 @@ common_c_local_includes = [
 
 android_common_cflags = [
     // Default parameters for jemalloc config.
-    "-DANDROID_ENABLE_TCACHE",
     "-DANDROID_LG_TCACHE_MAXCLASS_DEFAULT=16",
     "-DANDROID_NUM_ARENAS=2",
     "-DANDROID_TCACHE_NSLOTS_SMALL_MAX=8",
@@ -116,6 +118,10 @@ android_product_variables = {
 
             "-UANDROID_TCACHE_NSLOTS_LARGE",
             "-DANDROID_TCACHE_NSLOTS_LARGE=1",
+
+            // Minimize the size of the internal data structures by removing
+            // unused stats and other data not used on Android.
+            "-DANDROID_MINIMIZE_STRUCTS",
         ],
     },
 }
@@ -250,7 +256,7 @@ cc_library_host_static {
     },
 
     visibility: [
-        "//external/rust/crates/tikv-jemalloc-sys:__subpackages__",
+        "//external/rust/android-crates-io/crates/tikv-jemalloc-sys:__subpackages__",
     ],
 }
 

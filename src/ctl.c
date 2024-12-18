@@ -151,24 +151,32 @@ CTL_PROTO(stats_arenas_i_small_allocated)
 CTL_PROTO(stats_arenas_i_small_nmalloc)
 CTL_PROTO(stats_arenas_i_small_ndalloc)
 CTL_PROTO(stats_arenas_i_small_nrequests)
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 CTL_PROTO(stats_arenas_i_large_allocated)
 CTL_PROTO(stats_arenas_i_large_nmalloc)
 CTL_PROTO(stats_arenas_i_large_ndalloc)
+#endif
 CTL_PROTO(stats_arenas_i_large_nrequests)
 CTL_PROTO(stats_arenas_i_bins_j_nmalloc)
 CTL_PROTO(stats_arenas_i_bins_j_ndalloc)
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 CTL_PROTO(stats_arenas_i_bins_j_nrequests)
+#endif
 CTL_PROTO(stats_arenas_i_bins_j_curregs)
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 CTL_PROTO(stats_arenas_i_bins_j_nfills)
 CTL_PROTO(stats_arenas_i_bins_j_nflushes)
 CTL_PROTO(stats_arenas_i_bins_j_nslabs)
 CTL_PROTO(stats_arenas_i_bins_j_nreslabs)
 CTL_PROTO(stats_arenas_i_bins_j_curslabs)
+#endif
 INDEX_PROTO(stats_arenas_i_bins_j)
 CTL_PROTO(stats_arenas_i_lextents_j_nmalloc)
 CTL_PROTO(stats_arenas_i_lextents_j_ndalloc)
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 CTL_PROTO(stats_arenas_i_lextents_j_nrequests)
 CTL_PROTO(stats_arenas_i_lextents_j_curlextents)
+#endif
 INDEX_PROTO(stats_arenas_i_lextents_j)
 CTL_PROTO(stats_arenas_i_nthreads)
 CTL_PROTO(stats_arenas_i_uptime)
@@ -179,6 +187,7 @@ CTL_PROTO(stats_arenas_i_pactive)
 CTL_PROTO(stats_arenas_i_pdirty)
 CTL_PROTO(stats_arenas_i_pmuzzy)
 CTL_PROTO(stats_arenas_i_mapped)
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 CTL_PROTO(stats_arenas_i_retained)
 CTL_PROTO(stats_arenas_i_dirty_npurge)
 CTL_PROTO(stats_arenas_i_dirty_nmadvise)
@@ -191,6 +200,7 @@ CTL_PROTO(stats_arenas_i_internal)
 CTL_PROTO(stats_arenas_i_metadata_thp)
 CTL_PROTO(stats_arenas_i_tcache_bytes)
 CTL_PROTO(stats_arenas_i_resident)
+#endif
 INDEX_PROTO(stats_arenas_i)
 CTL_PROTO(stats_allocated)
 CTL_PROTO(stats_active)
@@ -212,15 +222,19 @@ CTL_PROTO(stats_##n##_total_wait_time)					\
 CTL_PROTO(stats_##n##_max_wait_time)					\
 CTL_PROTO(stats_##n##_max_num_thds)
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 /* Global mutexes. */
 #define OP(mtx) MUTEX_STATS_CTL_PROTO_GEN(mutexes_##mtx)
 MUTEX_PROF_GLOBAL_MUTEXES
 #undef OP
+#endif
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 /* Per arena mutexes. */
 #define OP(mtx) MUTEX_STATS_CTL_PROTO_GEN(arenas_i_mutexes_##mtx)
 MUTEX_PROF_ARENA_MUTEXES
 #undef OP
+#endif
 
 /* Arena bin mutexes. */
 MUTEX_STATS_CTL_PROTO_GEN(arenas_i_bins_j_mutex)
@@ -392,14 +406,18 @@ static const ctl_named_node_t stats_arenas_i_small_node[] = {
 	{NAME("allocated"),	CTL(stats_arenas_i_small_allocated)},
 	{NAME("nmalloc"),	CTL(stats_arenas_i_small_nmalloc)},
 	{NAME("ndalloc"),	CTL(stats_arenas_i_small_ndalloc)},
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	{NAME("nrequests"),	CTL(stats_arenas_i_small_nrequests)}
+#endif
 };
 
 static const ctl_named_node_t stats_arenas_i_large_node[] = {
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	{NAME("allocated"),	CTL(stats_arenas_i_large_allocated)},
 	{NAME("nmalloc"),	CTL(stats_arenas_i_large_nmalloc)},
 	{NAME("ndalloc"),	CTL(stats_arenas_i_large_ndalloc)},
 	{NAME("nrequests"),	CTL(stats_arenas_i_large_nrequests)}
+#endif
 };
 
 #define MUTEX_PROF_DATA_NODE(prefix)					\
@@ -426,13 +444,17 @@ MUTEX_PROF_DATA_NODE(arenas_i_bins_j_mutex)
 static const ctl_named_node_t stats_arenas_i_bins_j_node[] = {
 	{NAME("nmalloc"),	CTL(stats_arenas_i_bins_j_nmalloc)},
 	{NAME("ndalloc"),	CTL(stats_arenas_i_bins_j_ndalloc)},
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	{NAME("nrequests"),	CTL(stats_arenas_i_bins_j_nrequests)},
+#endif
 	{NAME("curregs"),	CTL(stats_arenas_i_bins_j_curregs)},
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	{NAME("nfills"),	CTL(stats_arenas_i_bins_j_nfills)},
 	{NAME("nflushes"),	CTL(stats_arenas_i_bins_j_nflushes)},
 	{NAME("nslabs"),	CTL(stats_arenas_i_bins_j_nslabs)},
 	{NAME("nreslabs"),	CTL(stats_arenas_i_bins_j_nreslabs)},
 	{NAME("curslabs"),	CTL(stats_arenas_i_bins_j_curslabs)},
+#endif
 	{NAME("mutex"),		CHILD(named, stats_arenas_i_bins_j_mutex)}
 };
 
@@ -447,8 +469,10 @@ static const ctl_indexed_node_t stats_arenas_i_bins_node[] = {
 static const ctl_named_node_t stats_arenas_i_lextents_j_node[] = {
 	{NAME("nmalloc"),	CTL(stats_arenas_i_lextents_j_nmalloc)},
 	{NAME("ndalloc"),	CTL(stats_arenas_i_lextents_j_ndalloc)},
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	{NAME("nrequests"),	CTL(stats_arenas_i_lextents_j_nrequests)},
 	{NAME("curlextents"),	CTL(stats_arenas_i_lextents_j_curlextents)}
+#endif
 };
 static const ctl_named_node_t super_stats_arenas_i_lextents_j_node[] = {
 	{NAME(""),		CHILD(named, stats_arenas_i_lextents_j)}
@@ -458,15 +482,19 @@ static const ctl_indexed_node_t stats_arenas_i_lextents_node[] = {
 	{INDEX(stats_arenas_i_lextents_j)}
 };
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 #define OP(mtx)  MUTEX_PROF_DATA_NODE(arenas_i_mutexes_##mtx)
 MUTEX_PROF_ARENA_MUTEXES
 #undef OP
+#endif
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 static const ctl_named_node_t stats_arenas_i_mutexes_node[] = {
 #define OP(mtx) {NAME(#mtx), CHILD(named, stats_arenas_i_mutexes_##mtx)},
 MUTEX_PROF_ARENA_MUTEXES
 #undef OP
 };
+#endif
 
 static const ctl_named_node_t stats_arenas_i_node[] = {
 	{NAME("nthreads"),	CTL(stats_arenas_i_nthreads)},
@@ -478,6 +506,7 @@ static const ctl_named_node_t stats_arenas_i_node[] = {
 	{NAME("pdirty"),	CTL(stats_arenas_i_pdirty)},
 	{NAME("pmuzzy"),	CTL(stats_arenas_i_pmuzzy)},
 	{NAME("mapped"),	CTL(stats_arenas_i_mapped)},
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	{NAME("retained"),	CTL(stats_arenas_i_retained)},
 	{NAME("dirty_npurge"),	CTL(stats_arenas_i_dirty_npurge)},
 	{NAME("dirty_nmadvise"), CTL(stats_arenas_i_dirty_nmadvise)},
@@ -490,11 +519,14 @@ static const ctl_named_node_t stats_arenas_i_node[] = {
 	{NAME("metadata_thp"),	CTL(stats_arenas_i_metadata_thp)},
 	{NAME("tcache_bytes"),	CTL(stats_arenas_i_tcache_bytes)},
 	{NAME("resident"),	CTL(stats_arenas_i_resident)},
+#endif
 	{NAME("small"),		CHILD(named, stats_arenas_i_small)},
 	{NAME("large"),		CHILD(named, stats_arenas_i_large)},
 	{NAME("bins"),		CHILD(indexed, stats_arenas_i_bins)},
 	{NAME("lextents"),	CHILD(indexed, stats_arenas_i_lextents)},
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	{NAME("mutexes"),	CHILD(named, stats_arenas_i_mutexes)}
+#endif
 };
 static const ctl_named_node_t super_stats_arenas_i_node[] = {
 	{NAME(""),		CHILD(named, stats_arenas_i)}
@@ -510,10 +542,13 @@ static const ctl_named_node_t stats_background_thread_node[] = {
 	{NAME("run_interval"),	CTL(stats_background_thread_run_interval)}
 };
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 #define OP(mtx) MUTEX_PROF_DATA_NODE(mutexes_##mtx)
 MUTEX_PROF_GLOBAL_MUTEXES
 #undef OP
+#endif
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 static const ctl_named_node_t stats_mutexes_node[] = {
 #define OP(mtx) {NAME(#mtx), CHILD(named, stats_mutexes_##mtx)},
 MUTEX_PROF_GLOBAL_MUTEXES
@@ -521,6 +556,7 @@ MUTEX_PROF_GLOBAL_MUTEXES
 	{NAME("reset"),		CTL(stats_mutexes_reset)}
 };
 #undef MUTEX_PROF_DATA_NODE
+#endif
 
 static const ctl_named_node_t stats_node[] = {
 	{NAME("allocated"),	CTL(stats_allocated)},
@@ -532,7 +568,9 @@ static const ctl_named_node_t stats_node[] = {
 	{NAME("retained"),	CTL(stats_retained)},
 	{NAME("background_thread"),
 	 CHILD(named, stats_background_thread)},
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	{NAME("mutexes"),	CHILD(named, stats_mutexes)},
+#endif
 	{NAME("arenas"),	CHILD(indexed, stats_arenas)}
 };
 
@@ -723,8 +761,10 @@ ctl_arena_stats_amerge(tsdn_t *tsdn, ctl_arena_t *ctl_arena, arena_t *arena) {
 			    ctl_arena->astats->bstats[i].nmalloc;
 			ctl_arena->astats->ndalloc_small +=
 			    ctl_arena->astats->bstats[i].ndalloc;
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 			ctl_arena->astats->nrequests_small +=
 			    ctl_arena->astats->bstats[i].nrequests;
+#endif
 		}
 	} else {
 		arena_basic_stats_merge(tsdn, arena, &ctl_arena->nthreads,
@@ -758,10 +798,13 @@ ctl_arena_stats_sdmerge(ctl_arena_t *ctl_sdarena, ctl_arena_t *ctl_arena,
 		if (!destroyed) {
 			accum_atomic_zu(&sdstats->astats.mapped,
 			    &astats->astats.mapped);
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 			accum_atomic_zu(&sdstats->astats.retained,
 			    &astats->astats.retained);
+#endif
 		}
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		ctl_accum_arena_stats_u64(&sdstats->astats.decay_dirty.npurge,
 		    &astats->astats.decay_dirty.npurge);
 		ctl_accum_arena_stats_u64(&sdstats->astats.decay_dirty.nmadvise,
@@ -775,7 +818,9 @@ ctl_arena_stats_sdmerge(ctl_arena_t *ctl_sdarena, ctl_arena_t *ctl_arena,
 		    &astats->astats.decay_muzzy.nmadvise);
 		ctl_accum_arena_stats_u64(&sdstats->astats.decay_muzzy.purged,
 		    &astats->astats.decay_muzzy.purged);
+#endif
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 #define OP(mtx) malloc_mutex_prof_merge(				\
 		    &(sdstats->astats.mutex_prof_data[			\
 		        arena_prof_mutex_##mtx]),			\
@@ -796,6 +841,7 @@ MUTEX_PROF_ARENA_MUTEXES
 			assert(atomic_load_zu(
 			    &astats->astats.internal, ATOMIC_RELAXED) == 0);
 		}
+#endif
 
 		if (!destroyed) {
 			sdstats->allocated_small += astats->allocated_small;
@@ -806,6 +852,7 @@ MUTEX_PROF_ARENA_MUTEXES
 		sdstats->ndalloc_small += astats->ndalloc_small;
 		sdstats->nrequests_small += astats->nrequests_small;
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		if (!destroyed) {
 			accum_atomic_zu(&sdstats->astats.allocated_large,
 			    &astats->astats.allocated_large);
@@ -822,6 +869,7 @@ MUTEX_PROF_ARENA_MUTEXES
 
 		accum_atomic_zu(&sdstats->astats.tcache_bytes,
 		    &astats->astats.tcache_bytes);
+#endif
 
 		if (ctl_arena->arena_ind == 0) {
 			sdstats->astats.uptime = astats->astats.uptime;
@@ -830,14 +878,17 @@ MUTEX_PROF_ARENA_MUTEXES
 		for (i = 0; i < NBINS; i++) {
 			sdstats->bstats[i].nmalloc += astats->bstats[i].nmalloc;
 			sdstats->bstats[i].ndalloc += astats->bstats[i].ndalloc;
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 			sdstats->bstats[i].nrequests +=
 			    astats->bstats[i].nrequests;
+#endif
 			if (!destroyed) {
 				sdstats->bstats[i].curregs +=
 				    astats->bstats[i].curregs;
 			} else {
 				assert(astats->bstats[i].curregs == 0);
 			}
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 			sdstats->bstats[i].nfills += astats->bstats[i].nfills;
 			sdstats->bstats[i].nflushes +=
 			    astats->bstats[i].nflushes;
@@ -849,6 +900,7 @@ MUTEX_PROF_ARENA_MUTEXES
 			} else {
 				assert(astats->bstats[i].curslabs == 0);
 			}
+#endif
 			malloc_mutex_prof_merge(&sdstats->bstats[i].mutex_data,
 			    &astats->bstats[i].mutex_data);
 		}
@@ -858,6 +910,7 @@ MUTEX_PROF_ARENA_MUTEXES
 			    &astats->lstats[i].nmalloc);
 			ctl_accum_arena_stats_u64(&sdstats->lstats[i].ndalloc,
 			    &astats->lstats[i].ndalloc);
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 			ctl_accum_arena_stats_u64(&sdstats->lstats[i].nrequests,
 			    &astats->lstats[i].nrequests);
 			if (!destroyed) {
@@ -866,6 +919,7 @@ MUTEX_PROF_ARENA_MUTEXES
 			} else {
 				assert(astats->lstats[i].curlextents == 0);
 			}
+#endif
 		}
 	}
 }
@@ -949,6 +1003,7 @@ ctl_refresh(tsdn_t *tsdn) {
 	}
 
 	if (config_stats) {
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		ctl_stats->allocated = ctl_sarena->astats->allocated_small +
 		    atomic_load_zu(&ctl_sarena->astats->astats.allocated_large,
 			ATOMIC_RELAXED);
@@ -961,10 +1016,13 @@ ctl_refresh(tsdn_t *tsdn) {
 		    &ctl_sarena->astats->astats.metadata_thp, ATOMIC_RELAXED);
 		ctl_stats->resident = atomic_load_zu(
 		    &ctl_sarena->astats->astats.resident, ATOMIC_RELAXED);
+#endif
 		ctl_stats->mapped = atomic_load_zu(
 		    &ctl_sarena->astats->astats.mapped, ATOMIC_RELAXED);
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 		ctl_stats->retained = atomic_load_zu(
 		    &ctl_sarena->astats->astats.retained, ATOMIC_RELAXED);
+#endif
 
 		ctl_background_thread_stats_read(tsdn);
 
@@ -2664,6 +2722,7 @@ CTL_RO_GEN(stats_arenas_i_pmuzzy, arenas_i(mib[2])->pmuzzy, size_t)
 CTL_RO_CGEN(config_stats, stats_arenas_i_mapped,
     atomic_load_zu(&arenas_i(mib[2])->astats->astats.mapped, ATOMIC_RELAXED),
     size_t)
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 CTL_RO_CGEN(config_stats, stats_arenas_i_retained,
     atomic_load_zu(&arenas_i(mib[2])->astats->astats.retained, ATOMIC_RELAXED),
     size_t)
@@ -2703,6 +2762,7 @@ CTL_RO_CGEN(config_stats, stats_arenas_i_tcache_bytes,
 CTL_RO_CGEN(config_stats, stats_arenas_i_resident,
     atomic_load_zu(&arenas_i(mib[2])->astats->astats.resident, ATOMIC_RELAXED),
     size_t)
+#endif
 
 CTL_RO_CGEN(config_stats, stats_arenas_i_small_allocated,
     arenas_i(mib[2])->astats->allocated_small, size_t)
@@ -2712,6 +2772,7 @@ CTL_RO_CGEN(config_stats, stats_arenas_i_small_ndalloc,
     arenas_i(mib[2])->astats->ndalloc_small, uint64_t)
 CTL_RO_CGEN(config_stats, stats_arenas_i_small_nrequests,
     arenas_i(mib[2])->astats->nrequests_small, uint64_t)
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 CTL_RO_CGEN(config_stats, stats_arenas_i_large_allocated,
     atomic_load_zu(&arenas_i(mib[2])->astats->astats.allocated_large,
     ATOMIC_RELAXED), size_t)
@@ -2727,6 +2788,7 @@ CTL_RO_CGEN(config_stats, stats_arenas_i_large_ndalloc,
 CTL_RO_CGEN(config_stats, stats_arenas_i_large_nrequests,
     ctl_arena_stats_read_u64(
     &arenas_i(mib[2])->astats->astats.nmalloc_large), uint64_t) /* Intentional. */
+#endif
 
 /* Lock profiling related APIs below. */
 #define RO_MUTEX_CTL_GEN(n, l)						\
@@ -2752,11 +2814,13 @@ CTL_RO_CGEN(config_stats, stats_##n##_max_num_thds,			\
 MUTEX_PROF_GLOBAL_MUTEXES
 #undef OP
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 /* Per arena mutexes */
 #define OP(mtx) RO_MUTEX_CTL_GEN(arenas_i_mutexes_##mtx,		\
     arenas_i(mib[2])->astats->astats.mutex_prof_data[arena_prof_mutex_##mtx])
 MUTEX_PROF_ARENA_MUTEXES
 #undef OP
+#endif
 
 /* tcache bin mutex */
 RO_MUTEX_CTL_GEN(arenas_i_bins_j_mutex,
@@ -2803,7 +2867,9 @@ stats_mutexes_reset_ctl(tsd_t *tsd, const size_t *mib, size_t miblen,
 		MUTEX_PROF_RESET(arena->extents_retained.mtx);
 		MUTEX_PROF_RESET(arena->decay_dirty.mtx);
 		MUTEX_PROF_RESET(arena->decay_muzzy.mtx);
+#if defined(ANDROID_ENABLE_TCACHE)
 		MUTEX_PROF_RESET(arena->tcache_ql_mtx);
+#endif
 		MUTEX_PROF_RESET(arena->base->mtx);
 
 		for (szind_t i = 0; i < NBINS; i++) {
@@ -2819,10 +2885,13 @@ CTL_RO_CGEN(config_stats, stats_arenas_i_bins_j_nmalloc,
     arenas_i(mib[2])->astats->bstats[mib[4]].nmalloc, uint64_t)
 CTL_RO_CGEN(config_stats, stats_arenas_i_bins_j_ndalloc,
     arenas_i(mib[2])->astats->bstats[mib[4]].ndalloc, uint64_t)
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 CTL_RO_CGEN(config_stats, stats_arenas_i_bins_j_nrequests,
     arenas_i(mib[2])->astats->bstats[mib[4]].nrequests, uint64_t)
+#endif
 CTL_RO_CGEN(config_stats, stats_arenas_i_bins_j_curregs,
     arenas_i(mib[2])->astats->bstats[mib[4]].curregs, size_t)
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 CTL_RO_CGEN(config_stats, stats_arenas_i_bins_j_nfills,
     arenas_i(mib[2])->astats->bstats[mib[4]].nfills, uint64_t)
 CTL_RO_CGEN(config_stats, stats_arenas_i_bins_j_nflushes,
@@ -2833,6 +2902,7 @@ CTL_RO_CGEN(config_stats, stats_arenas_i_bins_j_nreslabs,
     arenas_i(mib[2])->astats->bstats[mib[4]].reslabs, uint64_t)
 CTL_RO_CGEN(config_stats, stats_arenas_i_bins_j_curslabs,
     arenas_i(mib[2])->astats->bstats[mib[4]].curslabs, size_t)
+#endif
 
 static const ctl_named_node_t *
 stats_arenas_i_bins_j_index(tsdn_t *tsdn, const size_t *mib, size_t miblen,
@@ -2849,11 +2919,13 @@ CTL_RO_CGEN(config_stats, stats_arenas_i_lextents_j_nmalloc,
 CTL_RO_CGEN(config_stats, stats_arenas_i_lextents_j_ndalloc,
     ctl_arena_stats_read_u64(
     &arenas_i(mib[2])->astats->lstats[mib[4]].ndalloc), uint64_t)
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 CTL_RO_CGEN(config_stats, stats_arenas_i_lextents_j_nrequests,
     ctl_arena_stats_read_u64(
     &arenas_i(mib[2])->astats->lstats[mib[4]].nrequests), uint64_t)
 CTL_RO_CGEN(config_stats, stats_arenas_i_lextents_j_curlextents,
     arenas_i(mib[2])->astats->lstats[mib[4]].curlextents, size_t)
+#endif
 
 static const ctl_named_node_t *
 stats_arenas_i_lextents_j_index(tsdn_t *tsdn, const size_t *mib, size_t miblen,

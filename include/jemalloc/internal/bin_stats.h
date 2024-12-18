@@ -14,12 +14,14 @@ struct bin_stats_s {
 	uint64_t	nmalloc;
 	uint64_t	ndalloc;
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	/*
 	 * Number of allocation requests that correspond to the size of this
 	 * bin.  This includes requests served by tcache, though tcache only
 	 * periodically merges into this counter.
 	 */
 	uint64_t	nrequests;
+#endif
 
 	/*
 	 * Current number of regions of this size class, including regions
@@ -27,6 +29,7 @@ struct bin_stats_s {
 	 */
 	size_t		curregs;
 
+#if !defined(ANDROID_MINIMIZE_STRUCTS)
 	/* Number of tcache fills from this bin. */
 	uint64_t	nfills;
 
@@ -44,6 +47,7 @@ struct bin_stats_s {
 
 	/* Current number of slabs in this bin. */
 	size_t		curslabs;
+#endif
 
 	mutex_prof_data_t mutex_data;
 };
