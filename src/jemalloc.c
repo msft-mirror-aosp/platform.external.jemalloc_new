@@ -631,6 +631,7 @@ arenas_tdata_cleanup(tsd_t *tsd) {
 
 static void
 stats_print_atexit(void) {
+#if defined(ANDROID_ENABLE_TCACHE)
 	if (config_stats) {
 		tsdn_t *tsdn;
 		unsigned narenas, i;
@@ -658,6 +659,7 @@ stats_print_atexit(void) {
 			}
 		}
 	}
+#endif
 	je_malloc_stats_print(NULL, NULL, opt_stats_print_opts);
 }
 
@@ -3322,6 +3324,7 @@ jemalloc_postfork_child(void) {
 	tsd = tsd_fetch();
 
 	witness_postfork_child(tsd_witness_tsdp_get(tsd));
+	extent_postfork_child(tsd_tsdn(tsd));
 	/* Release all mutexes, now that fork() has completed. */
 	for (i = 0, narenas = narenas_total_get(); i < narenas; i++) {
 		arena_t *arena;
@@ -3344,4 +3347,5 @@ jemalloc_postfork_child(void) {
 #if defined(__BIONIC__) && !defined(JEMALLOC_JET)
 #include "android_je_iterate.c"
 #include "android_je_mallinfo.c"
+#include "android_je_stats.c"
 #endif
