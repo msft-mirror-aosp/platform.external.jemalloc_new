@@ -224,7 +224,7 @@ TEST_BEGIN(test_overflow) {
 	    "Expected OOM for rallocx(p, size=%#zx, 0)", ZU(PTRDIFF_MAX)+1);
 
 	assert_ptr_null(rallocx(p, SIZE_T_MAX, 0),
-	    "Expected OOM for rallocx(p, size=%#zx, 0)", SIZE_T_MAX);
+	    "Expected OOM for rallocx(p, size=%#zx, 0)", ZU(SIZE_T_MAX));
 
 	assert_ptr_null(rallocx(p, 1, MALLOCX_ALIGN(ZU(PTRDIFF_MAX)+1)),
 	    "Expected OOM for rallocx(p, size=1, MALLOCX_ALIGN(%#zx))",
