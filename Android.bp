@@ -47,6 +47,12 @@ license {
     ],
 }
 
+filegroup {
+    name: "libjemalloc5_notice",
+    srcs: ["COPYING"],
+    visibility: ["//external/musl"],
+}
+
 common_cflags = [
     "-D_GNU_SOURCE",
     "-D_REENTRANT",
@@ -218,8 +224,11 @@ cc_library {
     ],
     visibility: [
         "//bionic/libc",
+        "//build/kati:__subpackages__",
+        "//external/musl",
         "//external/ninja",
         "//external/stg",
+        "//frameworks/libs/native_bridge_support/android_api/libc",
     ],
 }
 
