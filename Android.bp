@@ -16,6 +16,7 @@
 
 package {
     default_applicable_licenses: ["external_jemalloc_new_license"],
+    default_visibility: [":__subpackages__"],
 }
 
 // Added automatically by a large-scale-change that took the approach of
@@ -34,7 +35,6 @@ package {
 // See: http://go/android-license-faq
 license {
     name: "external_jemalloc_new_license",
-    visibility: [":__subpackages__"],
     license_kinds: [
         "SPDX-license-identifier-Apache-2.0",
         "SPDX-license-identifier-BSD",
@@ -215,6 +215,11 @@ cc_library {
     apex_available: [
         "//apex_available:platform",
         "com.android.runtime",
+    ],
+    visibility: [
+        "//bionic/libc",
+        "//external/ninja",
+        "//external/stg",
     ],
 }
 
