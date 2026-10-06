@@ -149,6 +149,7 @@ cc_defaults {
     },
 
     local_include_dirs: common_c_local_includes,
+    extra_include_dir_deps: ["src/android_*.c"],
     stl: "none",
 }
 
