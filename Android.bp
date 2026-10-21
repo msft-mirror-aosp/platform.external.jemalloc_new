@@ -421,6 +421,8 @@ cc_test {
 
     srcs: [":jemalloc5_unittests_gtestified_srcs"],
 
+    extra_include_dir_deps: [":jemalloc5_unittests_gtestified_srcs"],
+
     static_libs: [
         "libjemalloc5_unittest",
         "libgtestifier",
