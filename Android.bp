@@ -229,6 +229,7 @@ cc_library {
         "//external/musl",
         "//external/ninja",
         "//external/stg",
+        "//frameworks/base/tools/aapt2",
         "//frameworks/libs/native_bridge_support/android_api/libc",
     ],
 }
